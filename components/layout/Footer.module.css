@@ -1,0 +1,22 @@
+.footer { border-top: 1px solid var(--glass-border); background: rgba(11, 15, 25, 0.8); }
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 28px;
+  padding-bottom: 28px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.links { display: flex; flex-wrap: wrap; gap: 20px; }
+.links a { transition: color 0.2s ease; }
+.links a:hover { color: var(--cyan); }
+
+@media (max-width: 600px) {
+  .inner { flex-direction: column; text-align: center; }
+  .links { justify-content: center; }
+}

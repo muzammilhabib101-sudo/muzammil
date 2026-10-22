@@ -1,0 +1,10 @@
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+.tags li {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #C7D2FE;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 999px;
+}

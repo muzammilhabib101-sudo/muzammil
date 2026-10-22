@@ -1,0 +1,42 @@
+.form {
+  display: grid;
+  gap: 18px;
+  padding: 32px;
+  border-radius: var(--radius);
+}
+
+.field { display: grid; gap: 8px; }
+.field label { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 13px 16px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: rgba(11, 15, 25, 0.65);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--text-dim); }
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+}
+.invalid input,
+.invalid textarea { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.14); }
+
+.honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.status { min-height: 1.4em; font-size: 14px; text-align: center; color: var(--text-muted); }
+.success { color: var(--success); }
+.error { color: #FB7185; }
+
+@media (max-width: 600px) {
+  .form { padding: 22px; }
+}

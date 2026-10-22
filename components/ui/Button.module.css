@@ -1,0 +1,45 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  white-space: nowrap;
+}
+.btn svg { transition: transform 0.25s ease; }
+.btn:hover svg { transform: translateX(3px); }
+.btn:disabled { opacity: 0.7; cursor: wait; transform: none; }
+
+.primary {
+  color: #fff;
+  background: var(--gradient);
+  box-shadow: 0 8px 30px -8px rgba(99, 102, 241, 0.6);
+}
+.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px -8px rgba(6, 182, 212, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+
+.glass {
+  color: var(--text);
+  background: rgba(30, 41, 59, 0.5);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.glass:hover {
+  transform: translateY(-2px);
+  border-color: var(--glass-border-hover);
+  background: rgba(30, 41, 59, 0.75);
+}
+.glass:hover svg { transform: translateY(2px); }
+
+.sm { padding: 10px 18px; font-size: 14px; }
+.block { width: 100%; }
