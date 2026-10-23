@@ -4,11 +4,11 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import {
-  buildMailtoHref,
   type ContactErrors,
   type ContactFields,
-  isFormspreeConfigured,
-  sendViaFormspree,
+  CONTACT_LIMITS,
+  ContactRequestError,
+  sendContactMessage,
   validateContact,
 } from "@/lib/contact";
 import { siteConfig } from "@/lib/site";
@@ -42,26 +42,27 @@ export function ContactForm() {
       return;
     }
 
-    // Bots fill the hidden honeypot field; humans never see it.
-    if (new FormData(event.currentTarget).get("_gotcha")) return;
-
-    if (!isFormspreeConfigured) {
-      window.location.href = buildMailtoHref(fields);
-      setStatus({ tone: "success", message: "Your email app should open with the message ready to send." });
-      return;
-    }
+    // Bots fill the hidden honeypot field; humans never see it. The server checks it too.
+    const honeypot = String(new FormData(event.currentTarget).get("_gotcha") ?? "");
 
     setSubmitting(true);
     setStatus(IDLE);
     try {
-      await sendViaFormspree(fields);
-      setStatus({ tone: "success", message: "Message sent. I’ll get back to you within 24 hours." });
+      await sendContactMessage(fields, honeypot);
+      setStatus({
+        tone: "success",
+        message: "Message sent! Check your inbox for a confirmation. I’ll get back to you within 24 hours.",
+      });
       setFields(EMPTY_FIELDS);
     } catch (error) {
       console.error(error);
+      if (error instanceof ContactRequestError) setErrors(error.fields);
       setStatus({
         tone: "error",
-        message: `Your message couldn’t be sent. Please try again, or email me at ${siteConfig.contact.email}.`,
+        message:
+          error instanceof ContactRequestError
+            ? error.message
+            : `Your message couldn’t be sent. Please try again, or email me at ${siteConfig.contact.email}.`,
       });
     } finally {
       setSubmitting(false);
@@ -74,6 +75,7 @@ export function ContactForm() {
     value: fields[name],
     onChange: handleChange,
     required: true,
+    maxLength: CONTACT_LIMITS[name],
     "aria-invalid": errors[name] ? true : undefined,
     "aria-describedby": errors[name] ? "contact-status" : undefined,
   });

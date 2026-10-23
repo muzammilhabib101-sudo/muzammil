@@ -1,3 +1,16 @@
+/**
+ * Canonical site URL (no trailing slash). Set NEXT_PUBLIC_SITE_URL for a custom
+ * domain; on Vercel it falls back to the project's production domain.
+ */
+function siteUrl(): string {
+  const url =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000");
+  return url.replace(/\/+$/, "");
+}
+
 /** Single source of truth for identity, contact details and navigation. */
 export const siteConfig = {
   name: "Muzammil Habib",
@@ -5,7 +18,7 @@ export const siteConfig = {
   role: "Agentic AI Engineer",
   tagline: "Agentic AI Specialist",
   location: "Türkiye",
-  url: "https://muzammilhabib101-sudo.github.io/muzammil",
+  url: siteUrl(),
   title: "Muzammil Habib — Agentic AI Engineer",
   description:
     "Muzammil Habib — Agentic AI Engineer based in Türkiye. Custom AI agents, autonomous workflows, Claude Code integration and Python-driven automation.",

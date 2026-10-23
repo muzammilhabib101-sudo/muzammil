@@ -57,6 +57,22 @@ const ICONS = {
   },
   code: { strokeWidth: 1.8, body: <path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" /> },
   bolt: { strokeWidth: 1.8, body: <path d="M13 2 4 14h7l-1 8 9-12h-7z" /> },
+  chat: {
+    strokeWidth: 1.8,
+    body: (
+      <>
+        <path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.1A8.5 8.5 0 1 1 21 12z" />
+        <path d="M8.5 12h.01M12 12h.01M15.5 12h.01" strokeWidth={2.6} />
+      </>
+    ),
+  },
+  sparkle: {
+    strokeWidth: 1.8,
+    body: <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" />,
+  },
+  close: { body: <path d="M18 6 6 18M6 6l12 12" /> },
+  refresh: { body: <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5" /> },
+  stop: { filled: true, body: <rect x="6" y="6" width="12" height="12" rx="2.5" /> },
 } satisfies Record<string, IconDef>;
 
 export type IconName = keyof typeof ICONS;

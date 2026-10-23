@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { AmbientBackground } from "@/components/layout/AmbientBackground";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Navbar />
         {children}
         <Footer />
+        <ChatWidget />
         <ScrollReveal />
         <noscript>
           <style>{"[data-reveal]:not([data-visible]){opacity:1}"}</style>
