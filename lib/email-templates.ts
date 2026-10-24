@@ -142,3 +142,80 @@ ${button(`${siteConfig.url}/#projects`, "View my projects")}
     text: `Hi ${firstName},\n\nThanks for reaching out! I've received your message and usually reply within 24 hours.\n\nIn the meantime, you can see my recent work at ${siteConfig.url}/#projects or reach me on WhatsApp at ${contact.phoneDisplay}.\n\nTalk soon,\n${siteConfig.name}\n${siteConfig.role}\n\nYou're receiving this because this address was used on the contact form at ${siteConfig.url}. If that wasn't you, you can ignore this email.\n`,
   };
 }
+
+export type AppointmentRequest = {
+  name: string;
+  email: string;
+  /** Requested start, formatted in the visitor's timezone. */
+  visitorTime: string;
+  /** The same instant in the site owner's timezone. */
+  ownerTime: string;
+  /** Visitor's IANA timezone. */
+  timezone: string;
+  notes?: string;
+};
+
+/** Main line plus a smaller muted caption, for detail rows. */
+function withCaption(main: string, caption: string): string {
+  return `${main}<br><span style="color:${C.muted};font-size:13px;">${caption}</span>`;
+}
+
+/** Booking request from the chatbot, sent to the site owner. */
+export function ownerAppointmentEmail(request: AppointmentRequest, receivedAt: Date): Email {
+  const { name, email, visitorTime, ownerTime, timezone, notes } = request;
+  const call = siteConfig.introCall.name;
+  const when = receivedAt.toUTCString();
+  const replySubject = `Your ${call.toLowerCase()} with ${siteConfig.name}`;
+
+  const body = `
+<p style="margin:0 0 6px;color:${C.cyan};font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;">New booking request · via AI assistant</p>
+<h1 style="margin:0 0 22px;color:${C.strong};font-size:22px;line-height:1.3;">${escapeHtml(name)} would like a ${escapeHtml(call.toLowerCase())}</h1>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+  ${detailRow("Name", escapeHtml(name))}
+  ${detailRow("Email", `<a href="mailto:${escapeHtml(email)}" style="color:${C.cyan};text-decoration:none;">${escapeHtml(email)}</a>`)}
+  ${detailRow("Your time", withCaption(`<strong>${escapeHtml(ownerTime)}</strong>`, `${escapeHtml(siteConfig.timezoneLabel)} · ${siteConfig.timezone}`))}
+  ${detailRow("Their time", withCaption(escapeHtml(visitorTime), escapeHtml(timezone)))}
+  ${detailRow("Received", escapeHtml(when))}
+</table>
+${
+  notes
+    ? `<p style="margin:0 0 10px;color:${C.muted};font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Notes from the chat</p>
+<div style="margin:0 0 28px;padding:18px 20px;background-color:${C.bg};border:1px solid ${C.border};border-left:3px solid ${C.indigo};border-radius:12px;color:${C.text};font-size:15px;line-height:1.7;">${multiline(notes)}</div>`
+    : ""
+}
+${button(`mailto:${email}?subject=${encodeURIComponent(replySubject)}`, "Reply to confirm a time")}
+<p style="margin:18px 0 0;color:${C.dim};font-size:13px;">The visitor has been told you’ll confirm the time and send a meeting link by email.</p>`;
+
+  return {
+    subject: `Booking request: ${call} with ${name}`,
+    html: layout({ preheader: `${name} · ${ownerTime} your time`, title: "New booking request", body }),
+    text: `New booking request (via AI assistant)\n\nName: ${name}\nEmail: ${email}\nYour time: ${ownerTime} (${siteConfig.timezone})\nTheir time: ${visitorTime} (${timezone})\nReceived: ${when}\n${notes ? `\nNotes:\n${notes}\n` : ""}`,
+  };
+}
+
+/**
+ * Confirmation for the visitor. Like the contact auto-reply, it only repeats
+ * the short scheduling fields, never free-form notes.
+ */
+export function visitorAppointmentEmail(request: AppointmentRequest): Email {
+  const firstName = request.name.trim().split(/\s+/)[0];
+  const call = siteConfig.introCall.name;
+
+  const body = `
+<h1 style="margin:0 0 18px;color:${C.strong};font-size:22px;line-height:1.3;">Your intro call request is in, ${escapeHtml(firstName)}!</h1>
+<p style="margin:0 0 20px;">Thanks for requesting a <strong style="color:${C.strong};">${escapeHtml(call.toLowerCase())}</strong>. I’ll check my calendar and reply within 24 hours to confirm a time and send you a meeting link.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+  ${detailRow("Requested", withCaption(escapeHtml(request.visitorTime), `Your timezone: ${escapeHtml(request.timezone)}`))}
+  ${detailRow("Length", `${siteConfig.introCall.minutes} minutes · free`)}
+</table>
+<p style="margin:0 0 24px;">If you’d like to share anything before we talk, just reply to this email.</p>
+${button(`${siteConfig.url}/#projects`, "View my projects")}
+<p style="margin:28px 0 0;">Talk soon,<br><strong style="color:${C.strong};">${escapeHtml(siteConfig.name)}</strong><br><span style="color:${C.muted};font-size:14px;">${escapeHtml(siteConfig.role)}</span></p>
+<p style="margin:24px 0 0;padding-top:18px;border-top:1px solid ${C.border};color:${C.dim};font-size:12.5px;">You’re receiving this because this address was used to request a call on ${escapeHtml(siteConfig.url.replace(/^https?:\/\//, ""))}. If that wasn’t you, you can safely ignore this email.</p>`;
+
+  return {
+    subject: `Got it, ${firstName}: your ${call.toLowerCase()} request`,
+    html: layout({ preheader: `I'll confirm a time within 24 hours.`, title: "Your intro call request", body }),
+    text: `Hi ${firstName},\n\nThanks for requesting a ${call.toLowerCase()}. I'll reply within 24 hours to confirm a time and send a meeting link.\n\nRequested: ${request.visitorTime} (${request.timezone})\nLength: ${siteConfig.introCall.minutes} minutes (free)\n\nTalk soon,\n${siteConfig.name}\n${siteConfig.role}\n\nYou're receiving this because this address was used to request a call on ${siteConfig.url}. If that wasn't you, you can ignore this email.\n`,
+  };
+}

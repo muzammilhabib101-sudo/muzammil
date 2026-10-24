@@ -71,6 +71,16 @@ const ICONS = {
     body: <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" />,
   },
   close: { body: <path d="M18 6 6 18M6 6l12 12" /> },
+  calendar: {
+    strokeWidth: 1.8,
+    body: (
+      <>
+        <rect x="3" y="5" width="18" height="16" rx="2.5" />
+        <path d="M3 10h18M8 3v4M16 3v4M8 14h.01M12 14h.01M16 14h.01M8 17.5h.01M12 17.5h.01" />
+      </>
+    ),
+  },
+  check: { body: <path d="M20 6 9 17l-5-5" /> },
   refresh: { body: <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5" /> },
   stop: { filled: true, body: <rect x="6" y="6" width="12" height="12" rx="2.5" /> },
 } satisfies Record<string, IconDef>;

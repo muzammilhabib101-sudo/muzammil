@@ -39,7 +39,7 @@ app/                    Routes, root layout, metadata, icons, robots/sitemap
   api/contact/route.ts  Sends contact form emails over SMTP
   globals.css           Design tokens, reset, shared utilities
 components/
-  chat/                 ChatWidget (launcher), ChatPanel (conversation UI), ChatMarkdown
+  chat/                 ChatWidget (launcher), ChatPanel (conversation UI), ChatMarkdown, ChatToolCards
   layout/               Navbar, Footer, AmbientBackground
   sections/             Hero, Expertise, Stack, Projects, Contact
   ui/                   Button, Icon, SectionHeader, TagList, GlowCard, ScrollReveal
@@ -47,6 +47,8 @@ content/portfolio.ts    All page copy: expertise, stack, projects, terminal scri
 hooks/                  useActiveSection, useScrolled, usePrefersReducedMotion
 lib/
   assistant.ts          Assistant name, greeting, suggestions and system instructions
+  assistant-tools.ts    Chatbot tools: booking options and appointment requests
+  rate-limit.ts         Shared per-IP throttle for outgoing email
   site.ts               Name, contact details, URLs, navigation
   contact.ts            Contact form validation and client-side sending
   mailer.ts             Nodemailer SMTP transport (server-only)
@@ -65,6 +67,17 @@ A chat button sits in the bottom-right corner of every page. Clicking it opens a
 - Requests are capped (message length, history length, output tokens) to keep costs predictable.
 - Change the greeting, suggested questions or the assistant's behaviour in `lib/assistant.ts`.
 
+### Contact & booking tools
+
+The assistant has two tools (`lib/assistant-tools.ts`) for visitors who want to get in touch:
+
+- **`getBookingOptions`** shows a card for the free 30-minute intro call, with a "Pick a time" button (your `BOOKING_URL`, if set), a "Request in chat" option, and your email, WhatsApp, phone and LinkedIn.
+- **`requestAppointment`** handles the in-chat option. The bot asks for the visitor's name, email, preferred date/time and timezone, then shows a review card. Nothing is sent until the visitor presses **Send request**. You then get a booking email (Reply-To is the visitor), and they get a confirmation saying you'll confirm a time within 24 hours. It uses the same SMTP settings and rate limit as the contact form.
+
+Change the meeting name or length in `lib/site.ts` (`introCall`).
+
+**Timezones:** the chat sends the visitor's browser timezone, so "next Tuesday at 3pm" is read in their local time. The booking tool converts it with `lib/timezone.ts` (DST-aware, no dependencies): your email shows both your time (`timezone` in `lib/site.ts`, `Europe/Istanbul`) and theirs, and the review card shows both too. Calendly or Cal.com links always show your free slots in the visitor's local time, which is expected; set your own timezone in their availability settings.
+
 ## Contact form
 
 Submissions go to `app/api/contact/route.ts`, which sends two emails with Nodemailer over SMTP:
@@ -80,7 +93,9 @@ Fields are validated in the browser and again on the server (`lib/contact.ts`). 
 | ------------------------------ | ----------------------------------------------------------------------------- |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | **Required for chat.** Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). Server-only. |
 | `GEMINI_MODEL`                 | Optional Gemini model ID. Defaults to `gemini-3.8-flash`.                     |
-| `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` | **Required for the contact form.** SMTP server and login. Server-only. |
+| `BOOKING_URL`                  | Optional Calendly / Cal.com link (https) for the chatbot's "Pick a time" button. |
+| `TOOL_APPROVAL_SECRET`         | Optional. Signs booking approvals so a tampered browser can't fake one.       |
+| `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` | **Required for the contact form and chat booking requests.** SMTP server and login. Server-only. |
 | `SMTP_PORT`, `SMTP_SECURE`     | Optional. Port 465 uses TLS, 587 (default) uses STARTTLS.                     |
 | `CONTACT_FROM_EMAIL`           | Optional sender address. Defaults to `SMTP_USER`.                             |
 | `CONTACT_TO_EMAIL`             | Optional inbox for new messages. Defaults to the email in `lib/site.ts`.      |

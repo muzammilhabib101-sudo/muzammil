@@ -1,21 +1,29 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { assistantConfig } from "@/lib/assistant";
+import type { AssistantUIMessage } from "@/lib/assistant-tools";
 import { siteConfig } from "@/lib/site";
+import { browserTimeZone } from "@/lib/timezone";
 import { cn, withBasePath } from "@/lib/utils";
 import styles from "./Chat.module.css";
 import { ChatMarkdown } from "./ChatMarkdown";
+import { AppointmentCard, BookingOptionsCard } from "./ChatToolCards";
 
-const transport = new DefaultChatTransport({ api: withBasePath("/api/chat/") });
+const transport = new DefaultChatTransport<AssistantUIMessage>({
+  api: withBasePath("/api/chat/"),
+  // Lets the assistant read "Tuesday at 3pm" in the visitor's own timezone.
+  body: () => ({ timezone: browserTimeZone() }),
+});
 
 type ChatPanelProps = { id: string; open: boolean; onClose: () => void };
 
-function messageText(message: UIMessage): string {
-  return message.parts.map((part) => (part.type === "text" ? part.text : "")).join("");
+/** True once a message has something to show: text or one of our tool cards. */
+function hasVisibleContent(message: AssistantUIMessage): boolean {
+  return message.parts.some((part) => (part.type === "text" ? part.text.trim() !== "" : part.type.startsWith("tool-")));
 }
 
 /** Surfaces the `{ error }` message our route returns; anything else gets a generic apology. */
@@ -29,14 +37,19 @@ function errorText(error: Error): string {
 
 export function ChatPanel({ id, open, onClose }: ChatPanelProps) {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status, stop, error, regenerate, setMessages } = useChat({ transport });
+  const { messages, sendMessage, status, stop, error, regenerate, setMessages, addToolApprovalResponse } =
+    useChat<AssistantUIMessage>({
+      transport,
+      // After the visitor approves or declines a booking request, let the model continue.
+      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+    });
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const stickToBottom = useRef(true);
 
   const busy = status === "submitted" || status === "streaming";
   const last = messages.at(-1);
-  const thinking = busy && (last?.role !== "assistant" || !messageText(last));
+  const thinking = busy && (last?.role !== "assistant" || !hasVisibleContent(last));
 
   useEffect(() => {
     if (open) inputRef.current?.focus({ preventScroll: true });
@@ -136,20 +149,48 @@ export function ChatPanel({ id, open, onClose }: ChatPanelProps) {
           </div>
         )}
 
-        {messages.map((message) => {
-          const text = messageText(message);
-          if (!text) return null;
-          return message.role === "user" ? (
-            <div key={message.id} className={cn(styles.message, styles.user)}>
-              <span className="visually-hidden">You: </span>
-              {text}
-            </div>
-          ) : (
-            <div key={message.id} className={cn(styles.message, styles.assistant)}>
-              <ChatMarkdown text={text} />
-            </div>
-          );
-        })}
+        {messages.map((message) =>
+          message.parts.map((part, i) => {
+            const key = `${message.id}-${i}`;
+            switch (part.type) {
+              case "text":
+                if (!part.text.trim()) return null;
+                return message.role === "user" ? (
+                  <div key={key} className={cn(styles.message, styles.user)}>
+                    <span className="visually-hidden">You: </span>
+                    {part.text}
+                  </div>
+                ) : (
+                  <div key={key} className={cn(styles.message, styles.assistant)}>
+                    <ChatMarkdown text={part.text} />
+                  </div>
+                );
+              case "tool-getBookingOptions":
+                return (
+                  <BookingOptionsCard
+                    key={key}
+                    part={part}
+                    disabled={busy}
+                    onRequestInChat={() => send("I'd like you to send a booking request for me.")}
+                  />
+                );
+              case "tool-requestAppointment":
+                return (
+                  <AppointmentCard
+                    key={key}
+                    part={part}
+                    disabled={busy}
+                    onApprovalResponse={(response) => {
+                      stickToBottom.current = true;
+                      return addToolApprovalResponse(response);
+                    }}
+                  />
+                );
+              default:
+                return null;
+            }
+          }),
+        )}
 
         {thinking && (
           <div className={cn(styles.message, styles.assistant, styles.typing)} aria-label="Assistant is typing">

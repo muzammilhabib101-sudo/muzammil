@@ -43,6 +43,11 @@ export const siteConfig = {
     linkedinHandle: "in/muzammil-habib",
   },
   resumePath: "/resume.pdf",
+  /** The meeting the chatbot offers visitors. */
+  introCall: { name: "Free 30-minute intro call", minutes: 30 },
+  /** Your own IANA timezone; booking requests are converted to it. */
+  timezone: "Europe/Istanbul",
+  timezoneLabel: "Türkiye",
   themeColor: "#0B0F19",
 } as const;
 

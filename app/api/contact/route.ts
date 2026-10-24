@@ -1,27 +1,8 @@
 import { type ContactFields, validateContact } from "@/lib/contact";
 import { ownerNotificationEmail, visitorConfirmationEmail } from "@/lib/email-templates";
 import { getMailer } from "@/lib/mailer";
+import { clientIp, MAIL_RATE_LIMIT, rateLimited, stripControlChars as clean } from "@/lib/rate-limit";
 import { siteConfig } from "@/lib/site";
-
-// Basic per-IP throttle. It lives in memory, so it is per server instance:
-// enough to stop casual abuse of the auto-reply, not a distributed limiter.
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_PER_WINDOW = 5;
-const hits = new Map<string, number[]>();
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  recent.push(now);
-  hits.set(ip, recent);
-  if (hits.size > 5000) hits.clear();
-  return recent.length > MAX_PER_WINDOW;
-}
-
-/** Strips control characters except line breaks; name/email drop those too, below. */
-function clean(value: unknown): string {
-  return typeof value === "string" ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "") : "";
-}
 
 export async function POST(req: Request) {
   let body: Record<string, unknown>;
@@ -47,8 +28,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (rateLimited(ip)) {
+  if (rateLimited(`mail:${clientIp(req)}`, MAIL_RATE_LIMIT)) {
     return Response.json(
       { error: "You’ve sent several messages already. Please try again in a few minutes." },
       { status: 429 },
