@@ -32,7 +32,7 @@ export function buildInstructions(now: Date, visitorTimeZone?: string): string {
     .join("\n");
   const stackLines = stack.map((group) => `- ${group.title}: ${group.items.join(", ")}`).join("\n");
   const projectLines = projects
-    .map((project) => `- ${project.title}: ${project.description} (${project.tags.join(", ")})`)
+    .map((project) => `- ${project.title}: ${project.description} (${project.tags.join(", ")})${project.url ? ` — live: ${project.url}` : ""}`)
     .join("\n");
 
   return `You are ${assistantConfig.name}, the friendly assistant on the portfolio website of ${siteConfig.name}, a ${siteConfig.role} based in ${siteConfig.location}. You speak to visitors (often recruiters, founders and engineers) on his behalf, referring to him in the third person.

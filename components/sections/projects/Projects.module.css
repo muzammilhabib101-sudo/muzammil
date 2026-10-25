@@ -23,17 +23,26 @@
 .agents { color: #A5B4FC; background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.4), transparent 60%), var(--bg-2); }
 .review { color: #67E8F9; background: radial-gradient(circle at 70% 30%, rgba(6, 182, 212, 0.35), transparent 60%), var(--bg-2); }
 .pipeline { color: #C4B5FD; background: radial-gradient(circle at 50% 80%, rgba(139, 92, 246, 0.38), transparent 60%), var(--bg-2); }
+.quran { color: #E5C07B; background: radial-gradient(circle at 30% 30%, rgba(212, 166, 74, 0.32), transparent 60%), var(--bg-2); }
+
+/* Featured card: real screenshot beside the text, spanning the whole row. */
+.featured { grid-column: 1 / -1; flex-direction: row; }
+.featured .art { flex: 0 0 56%; height: auto; min-height: 300px; border-bottom: 0; border-right: 1px solid var(--glass-border); }
+.shot { padding: 0; }
+.shot img { object-fit: cover; object-position: left top; transition: transform 0.6s ease; }
+.project:hover .shot img { transform: scale(1.03); }
 
 .body { display: flex; flex-direction: column; flex: 1; padding: 26px 24px 28px; }
 .num { font-family: var(--mono); font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
 .body h3 { margin-top: 8px; font-size: 1.18rem; font-weight: 700; }
 .body p { margin-top: 10px; font-size: 14.5px; color: var(--text-muted); flex: 1; }
 
+.links { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
+
 .link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 22px;
   font-size: 14px;
   font-weight: 600;
   color: var(--cyan);
@@ -43,4 +52,6 @@
 
 @media (max-width: 900px) {
   .grid { grid-template-columns: 1fr; }
+  .featured { flex-direction: column; }
+  .featured .art { flex: none; min-height: 0; aspect-ratio: 16 / 9; border-right: 0; border-bottom: 1px solid var(--glass-border); }
 }

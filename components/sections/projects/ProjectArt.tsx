@@ -29,6 +29,13 @@ const ART: Record<ProjectArtKind, ReactNode> = {
       <path d="M100 42V22h58v20" strokeDasharray="3 4" />
     </>
   ),
+  quran: (
+    <>
+      <path d="M100 30c-16-10-38-12-60-8v68c22-4 44-2 60 8 16-10 38-12 60-8V22c-22-4-44-2-60 8Z" />
+      <path d="M100 30v68" />
+      <path d="M54 44h32M54 56h32M54 68h24M114 44h32M114 56h32M122 68h24" strokeDasharray="3 4" />
+    </>
+  ),
 };
 
 /** Line-art illustration for a project card. */

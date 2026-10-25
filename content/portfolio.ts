@@ -75,9 +75,18 @@ export const stack: StackGroup[] = [
   { index: "C", title: "Automation & DevOps", items: ["GitHub Actions", "Git", "Docker", "Webhooks", "REST APIs"] },
 ];
 
-export type ProjectArt = "agents" | "review" | "pipeline";
+export type ProjectArt = "agents" | "review" | "pipeline" | "quran";
 
-export type Project = { art: ProjectArt; title: string; description: string; tags: string[] };
+export type Project = {
+  art: ProjectArt;
+  title: string;
+  description: string;
+  tags: string[];
+  /** Screenshot in `public/`; replaces the line-art illustration and makes the card full-width. */
+  image?: `/${string}`;
+  /** Live deployment. */
+  url?: string;
+};
 
 export const projectsSection: SectionIntro = {
   id: "projects",
@@ -87,6 +96,15 @@ export const projectsSection: SectionIntro = {
 };
 
 export const projects: Project[] = [
+  {
+    art: "quran",
+    title: "Quranic Arabic Language Course",
+    description:
+      "A bilingual (Urdu & English) learning platform that teaches the Arabic of the Quran word by word — roots, patterns and verb anatomy — with spaced-repetition practice, authentic recitation audio, a searchable dictionary and offline-friendly progress tracking.",
+    tags: ["Next.js", "TypeScript", "Spaced Repetition", "i18n · RTL"],
+    image: "/projects/quranic-arabic.png",
+    url: "https://quranic-arabic-language.vercel.app",
+  },
   {
     art: "agents",
     title: "Autonomous Multi-Agent Research Assistant",
